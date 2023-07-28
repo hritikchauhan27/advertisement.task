@@ -1,7 +1,7 @@
 import Sequelize from "sequelize";
 import { sequelize, dbconnection } from "../core/connection";
 
-const Session = sequelize.define('Session', {
+const Session = sequelize.define('Sessions', {
     id: {
         allowNull: false,
         autoIncrement: true,

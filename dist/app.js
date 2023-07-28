@@ -29,13 +29,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv = __importStar(require("dotenv"));
 const connection_1 = require("./core/connection");
-const route_1 = require("./router/route");
+const userRoute_1 = require("./router/userRoute");
+const categoryRoute_1 = require("./router/categoryRoute");
 const app = (0, express_1.default)();
 dotenv.config();
 (0, connection_1.dbconnection)();
 app.use(express_1.default.json());
 const port = process.env.PORT;
-app.use('/', route_1.router);
+app.use('/', userRoute_1.userRouter);
+app.use("/", categoryRoute_1.cateRouter);
 app.listen(port, () => {
     console.log(`listening at port ${port}`);
 });

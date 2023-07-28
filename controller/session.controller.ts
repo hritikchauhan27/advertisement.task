@@ -1,23 +1,23 @@
 import { Session } from "../models/session.model";
 
 export class Sessions{
-    static async maintain_session(req: any, res: any,device, user ,userSession){
+    static async maintain_session(req, res,device, user ,userSession){
         try{
-
+            
             if(user){
                 if(!userSession){
-                    const session_details = Session.create({
+                    const session_details = await Session.create({
                         user_id: user.id,
                         device_id:device,
                         status: true
                     });
-                    const session = await session_details.save();
+                    // const session = await session_details.save();
                     console.log("Session stored successfully");
-                    console.log(session);
+                    console.log(session_details);
                 }
                 else if(userSession){
                     if(!userSession.status){
-                        await Session.findOneAndUpdate({user_id: user.id}, {status: !userSession.status});
+                        await Session.update({status: !userSession.status},{where:{user_id: user.id}});
                         console.log("Session Activate");
                     }
                 }

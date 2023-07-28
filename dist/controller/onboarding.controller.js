@@ -12,33 +12,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signUp = void 0;
+exports.Logout = exports.LoginUser = exports.signUp = void 0;
 const user_model_1 = require("../models/user.model");
 const validation_1 = require("../middleware/validation");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const redis_session_1 = require("../middleware/redis.session");
+const redis_1 = require("redis");
+const session_model_1 = require("../models/session.model");
+const session_controller_1 = require("./session.controller");
+const decode_1 = require("../middleware/decode");
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+// const redisClient = createClient();
+// redisClient.on('error', err => console.log('Redis client error', err));
+// redisClient.connect();
 dotenv_1.default.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 class signUp {
     static userLogin(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const details = req.body;
-            console.log(details);
+            // console.log(details);
             try {
                 const { error, value } = yield validation_1.schema.validate(details);
                 if (error) {
                     res.status(400).json({ message: "Invalid user input" });
                 }
                 else {
-                    const user = yield user_model_1.User.findOne({ email: details.email });
-                    console.log(user);
+                    const user = yield user_model_1.User.findOne({ where: { email: details.email } });
+                    // console.log(user);
                     if (user) {
                         res.status(409).json({ message: "User already exist" });
                     }
                     else {
                         const salt = yield bcrypt_1.default.genSalt(10);
                         const hashPassword = yield bcrypt_1.default.hash(details.password, salt);
-                        console.log(hashPassword);
+                        // console.log(hashPassword);
                         const newUser = yield user_model_1.User.create({
                             email: details.email,
                             name: details.name,
@@ -47,7 +56,7 @@ class signUp {
                             status: details.status,
                             DOB: details.DOB
                         });
-                        console.log(newUser);
+                        // console.log(newUser);
                         res.status(201).json({ message: "User registered successfully" });
                     }
                 }
@@ -59,4 +68,94 @@ class signUp {
     }
 }
 exports.signUp = signUp;
+class LoginUser {
+    static userLogin(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const redisClient = (0, redis_1.createClient)();
+            redisClient.on('error', err => console.log('Redis client error', err));
+            yield redisClient.connect();
+            const detail = req.body;
+            try {
+                const device = req.headers.device;
+                console.log(device);
+                yield decode_1.Auth.verify_login_details.validateAsync(detail);
+                const user = yield user_model_1.User.findOne({ where: { email: detail.email } });
+                console.log(user);
+                if (user) {
+                    const userSession = yield session_model_1.Session.findOne({ where: { user_id: user.id } });
+                    console.log(userSession);
+                    if (!userSession || !userSession.status) {
+                        const hash = user.password;
+                        if (bcrypt_1.default.compare(detail.password, hash)) {
+                            // const emailT = detail.email;
+                            const token = jsonwebtoken_1.default.sign(detail.email, process.env.SECRET_KEY);
+                            console.log(token);
+                            yield session_controller_1.Sessions.maintain_session(req, res, device, user, userSession);
+                            console.log(userSession);
+                            yield redis_session_1.Redis.maintain_session_redis(redisClient, user, device);
+                            res.status(201).json({ message: "login successfully", user: user, token });
+                        }
+                        else {
+                            res.status(404).json({ message: "password is incorrect" });
+                        }
+                    }
+                    else {
+                        res.status(404).json({ message: "User is already active" });
+                    }
+                }
+                else {
+                    res.status(404).json({ status: "user not found" });
+                }
+            }
+            catch (error) {
+                res.status(500).json({ status: "Server Error" });
+                console.log(error);
+            }
+        });
+    }
+}
+exports.LoginUser = LoginUser;
+class Logout {
+    static logout_user(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const redisClient = (0, redis_1.createClient)();
+            redisClient.on('error', err => console.log('Redis client error', err));
+            yield redisClient.connect();
+            try {
+                const token = req.headers.authorization;
+                const userToken = yield decode_1.Auth.verify_token(token);
+                const user = yield user_model_1.User.findOne({ where: { email: userToken } });
+                console.log(user);
+                if (user) {
+                    const id = user.id;
+                    console.log(id);
+                    const userSession = yield session_model_1.Session.findOne({ where: { user_id: id } });
+                    console.log(userSession);
+                    if (user) {
+                        if (userSession.status) {
+                            yield redis_session_1.Redis.logout_session_redis(redisClient, user);
+                            const updatedUserSession = yield session_model_1.Session.update({ status: !userSession.status }, { where: { id: userSession.id }
+                            });
+                            console.log(updatedUserSession);
+                            res.status(201).json({ message: "User logOut Successfully" });
+                        }
+                        else {
+                            res.status(404).json({ message: "User is already inactive" });
+                        }
+                    }
+                    else {
+                        res.status(404).json({ message: "Session not found" });
+                    }
+                }
+                else {
+                    res.status(404).json({ message: "User not found" });
+                }
+            }
+            catch (err) {
+                res.status(500).json({ message: "Server Error" });
+            }
+        });
+    }
+}
+exports.Logout = Logout;
 //# sourceMappingURL=onboarding.controller.js.map

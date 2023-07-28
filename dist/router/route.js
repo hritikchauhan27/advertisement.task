@@ -10,4 +10,6 @@ const router = express_1.default.Router();
 exports.router = router;
 router.get("/");
 router.post("/signup", onboarding_controller_1.signUp.userLogin);
+router.post("/login", onboarding_controller_1.LoginUser.userLogin);
+router.get("/logout", onboarding_controller_1.Logout.logout_user);
 //# sourceMappingURL=route.js.map
