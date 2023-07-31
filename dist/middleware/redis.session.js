@@ -53,6 +53,20 @@ class Redis {
             }
         });
     }
+    static save_otp(email, OTP) {
+        return __awaiter(this, void 0, void 0, function* () {
+            client.on('error', err => console.log('Redis client error', err));
+            try {
+                yield client.setEx(email, 300, JSON.stringify({
+                    otp: OTP
+                }));
+                console.log("otp stored successfully");
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
+    }
 }
 exports.Redis = Redis;
 //# sourceMappingURL=redis.session.js.map

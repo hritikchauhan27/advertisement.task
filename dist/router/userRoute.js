@@ -12,4 +12,5 @@ userRouter.get("/");
 userRouter.post("/signup", onboarding_controller_1.signUp.userLogin);
 userRouter.post("/login", onboarding_controller_1.LoginUser.userLogin);
 userRouter.get("/logout", onboarding_controller_1.Logout.logout_user);
+userRouter.post('/forgot_pass', onboarding_controller_1.forgotPassword.forgot_password);
 //# sourceMappingURL=userRoute.js.map

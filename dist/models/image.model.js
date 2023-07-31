@@ -13,7 +13,7 @@ const Image = connection_1.sequelize.define('Images', {
         primaryKey: true,
         type: sequelize_1.default.INTEGER
     },
-    image: { type: sequelize_1.default.BLOB },
+    image: { type: sequelize_1.default.ARRAY(sequelize_1.default.BLOB) },
     product_id: { type: sequelize_1.default.INTEGER },
     createdAt: {
         allowNull: false,

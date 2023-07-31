@@ -7,7 +7,7 @@ const Image = sequelize.define('Images',{
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-    image:{type: Sequelize.BLOB},
+    image:{type: Sequelize.ARRAY(Sequelize.BLOB)},
     product_id:{type:Sequelize.INTEGER},
     createdAt: {
         allowNull: false,

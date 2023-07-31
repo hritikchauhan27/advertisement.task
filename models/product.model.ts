@@ -10,7 +10,15 @@ const Product = sequelize.define('Products',{
     name: {type: Sequelize.STRING},
     description: {type: Sequelize.STRING},
     base_price: {type: Sequelize.INTEGER},
-    current_bid: {type: Sequelize.INTEGER},
+    current_bid: {type: Sequelize.INTEGER,
+      // validate: {
+      //   checkPrice(){
+      //     if(this.current_bid){
+
+      //     }
+      //   }
+      // }
+    },
     owner_id: {type: Sequelize.INTEGER},
     bidder_id: {type: Sequelize.INTEGER},
     category_id: {type: Sequelize.INTEGER},

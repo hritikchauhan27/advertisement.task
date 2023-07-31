@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logout = exports.LoginUser = exports.signUp = void 0;
+exports.forgotPassword = exports.Logout = exports.LoginUser = exports.signUp = void 0;
 const user_model_1 = require("../models/user.model");
 const validation_1 = require("../middleware/validation");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -23,6 +23,7 @@ const session_controller_1 = require("./session.controller");
 const decode_1 = require("../middleware/decode");
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const nodemailer_1 = __importDefault(require("nodemailer"));
 // const redisClient = createClient();
 // redisClient.on('error', err => console.log('Redis client error', err));
 // redisClient.connect();
@@ -134,7 +135,8 @@ class Logout {
                     if (user) {
                         if (userSession.status) {
                             yield redis_session_1.Redis.logout_session_redis(redisClient, user);
-                            const updatedUserSession = yield session_model_1.Session.update({ status: !userSession.status }, { where: { id: userSession.id }
+                            const updatedUserSession = yield session_model_1.Session.update({ status: !userSession.status }, {
+                                where: { id: userSession.id }
                             });
                             console.log(updatedUserSession);
                             res.status(201).json({ message: "User logOut Successfully" });
@@ -158,4 +160,53 @@ class Logout {
     }
 }
 exports.Logout = Logout;
+class forgotPassword {
+    static forgot_password(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = req.body;
+                const user = yield user_model_1.User.findOne({ where: { email } });
+                if (!user) {
+                    return res.status(400).json({ message: 'Email not found' });
+                }
+                let OTP = Math.floor(1000 + Math.random() * 9000);
+                redis_session_1.Redis.save_otp(email, OTP);
+                const transporter = nodemailer_1.default.createTransport({
+                    service: 'gmail',
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    secure: false,
+                    auth: {
+                        user: process.env.EMAIL_ADDRESS,
+                        pass: process.env.EMAIL_PASSWORD,
+                    },
+                });
+                const mailOptions = {
+                    from: process.env.EMAIL_ADDRESS,
+                    to: 'hritik.chauhan@appinventiv.com',
+                    subject: 'Password Reset Request',
+                    text: `You are receiving this email because you (or someone else) has requested a password reset for your account.\n\n
+                        Please click on the following link, or paste this into your browser to complete the process:\n\n
+                        ${process.env.CLIENT_URL}/RESET PASSWORD OTP: ${OTP}\n\n
+                        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        return res.status(500).json({ message: 'Error sending email' });
+                    }
+                    else {
+                        console.log('Email sent: ' + info.response);
+                        return res.status(200).json({ message: 'Password reset link sent to email' });
+                    }
+                });
+            }
+            catch (error) {
+                console.log(error);
+                res.status(500).json({ message: 'Server error' });
+            }
+        });
+    }
+}
+exports.forgotPassword = forgotPassword;
 //# sourceMappingURL=onboarding.controller.js.map

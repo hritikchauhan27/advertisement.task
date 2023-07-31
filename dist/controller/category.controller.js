@@ -13,6 +13,7 @@ exports.category = void 0;
 const connection_1 = require("../core/connection");
 const { QueryTypes } = require('sequelize');
 class category {
+    //****** By using Recursive CTE to find category and sub category in one API *******/
     static getCategory(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

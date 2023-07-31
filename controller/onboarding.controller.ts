@@ -9,6 +9,7 @@ import { Sessions } from "./session.controller";
 import { Auth } from "../middleware/decode";
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import nodemailer from "nodemailer";
 
 // const redisClient = createClient();
 // redisClient.on('error', err => console.log('Redis client error', err));
@@ -27,7 +28,7 @@ export class signUp {
             if (error) {
                 res.status(400).json({ message: "Invalid user input" });
             } else {
-                const user = await User.findOne({where:{ email: details.email }});
+                const user = await User.findOne({ where: { email: details.email } });
                 // console.log(user);
                 if (user) {
                     res.status(409).json({ message: "User already exist" });
@@ -63,10 +64,10 @@ export class LoginUser {
             const device = req.headers.device;
             console.log(device);
             await Auth.verify_login_details.validateAsync(detail);
-            const user = await User.findOne({where:{ email: detail.email }});
+            const user = await User.findOne({ where: { email: detail.email } });
             console.log(user);
             if (user) {
-                const userSession = await Session.findOne({where:{ user_id: user.id }});
+                const userSession = await Session.findOne({ where: { user_id: user.id } });
                 console.log(userSession);
                 if (!userSession || !userSession.status) {
                     const hash = user.password;
@@ -76,7 +77,7 @@ export class LoginUser {
                         console.log(token);
                         await Sessions.maintain_session(req, res, device, user, userSession);
                         console.log(userSession);
-                        await Redis.maintain_session_redis(redisClient,user, device);
+                        await Redis.maintain_session_redis(redisClient, user, device);
                         res.status(201).json({ message: "login successfully", user: user, token });
                     }
                     else {
@@ -99,49 +100,102 @@ export class LoginUser {
 }
 
 
-export class Logout{
-    static async logout_user(req: any, res:any){
-        const redisClient = createClient();
+export class Logout {
+    static async logout_user(req: any, res: any) {
+        const redisClient = createClient(); 
         redisClient.on('error', err => console.log('Redis client error', err));
         await redisClient.connect();
-        try{
+        try {
             const token = req.headers.authorization;
-            const userToken = await Auth.verify_token(token);            
-            const user = await User.findOne({where:{email: userToken}});
+            const userToken = await Auth.verify_token(token);
+            const user = await User.findOne({ where: { email: userToken } }); //TODO:7
             console.log(user);
-            if(user){
+            if (user) {
                 const id = user.id;
                 console.log(id);
-                
-                const userSession = await Session.findOne({where:{user_id: id}});
-                console.log(userSession);
-                if(user){
-                    if(userSession.status){
-                        await Redis.logout_session_redis(redisClient,user);
 
-                        const updatedUserSession = await Session.update({status: !userSession.status},
-                            {where:
-                                {id: userSession.id}
+                const userSession = await Session.findOne({ where: { user_id: id } });
+                console.log(userSession);
+                if (user) {
+                    if (userSession.status) {
+                        await Redis.logout_session_redis(redisClient, user);
+
+                        const updatedUserSession = await Session.update({ status: !userSession.status },
+                            {
+                                where:
+                                    { id: userSession.id } //TODO:8
                             });
                         console.log(updatedUserSession);
-                        res.status(201).json({message: "User logOut Successfully"});
+                        res.status(201).json({ message: "User logOut Successfully" });
                     }
-                    else{
-                        res.status(404).json({message:"User is already inactive"});
+                    else {
+                        res.status(404).json({ message: "User is already inactive" });
                     }
                 }
-                else{
-                    res.status(404).json({message: "Session not found"});
+                else {
+                    res.status(404).json({ message: "Session not found" });
                 }
             }
-            else{
-                res.status(404).json({message:"User not found"});
+            else {
+                res.status(404).json({ message: "User not found" });
             }
 
         }
-        catch(err){
-            res.status(500).json({message: "Server Error"});
+        catch (err) {
+            res.status(500).json({ message: "Server Error" });
         }
     }
-    
+
 }
+
+
+export class forgotPassword {
+    static async forgot_password(req: any, res: any) {
+        try {
+            const { email } = req.body;
+            const user = await User.findOne({ where: { email } });
+            if (!user) {
+                return res.status(400).json({ message: 'Email not found' });
+            }
+
+            let OTP = Math.floor(1000 + Math.random() * 9000);
+            Redis.save_otp(email, OTP);
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: false,
+                auth: {
+                    user: process.env.EMAIL_ADDRESS,
+                    pass: process.env.EMAIL_PASSWORD,
+                },
+            });
+
+            const mailOptions = {
+                from: process.env.EMAIL_ADDRESS,
+                to: 'hritik.chauhan@appinventiv.com',
+                subject: 'Password Reset Request',
+                text: `You are receiving this email because you (or someone else) has requested a password reset for your account.\n\n
+                        Please click on the following link, or paste this into your browser to complete the process:\n\n
+                        ${process.env.CLIENT_URL}/RESET PASSWORD OTP: ${OTP}\n\n
+                        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    return res.status(500).json({ message: 'Error sending email' });
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    return res.status(200).json({ message: 'Password reset link sent to email' });
+                }
+            });
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+}
+
