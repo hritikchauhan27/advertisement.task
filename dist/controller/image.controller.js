@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.image = void 0;
 const image_model_1 = require("../models/image.model");
-// import { Op } from "sequelize";
 const fs_1 = __importDefault(require("fs"));
 class image {
     static addimages(req, res) {

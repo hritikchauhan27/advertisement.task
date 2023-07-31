@@ -1,5 +1,4 @@
 import { Image } from "../models/image.model";
-// import { Op } from "sequelize";
 import fs from "fs";
 
 export class image {

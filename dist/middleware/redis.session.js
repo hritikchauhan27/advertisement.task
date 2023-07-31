@@ -67,6 +67,18 @@ class Redis {
             }
         });
     }
+    static get_otp(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (yield client.exists(email)) {
+                const otp_details = yield client.get(email);
+                const userOTP = JSON.parse(otp_details);
+                return userOTP.otp;
+            }
+            else {
+                return false;
+            }
+        });
+    }
 }
 exports.Redis = Redis;
 //# sourceMappingURL=redis.session.js.map

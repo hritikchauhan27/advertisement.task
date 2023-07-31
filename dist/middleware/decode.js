@@ -16,12 +16,14 @@ exports.Auth = void 0;
 const joi_1 = __importDefault(require("@hapi/joi"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const user_model_1 = require("../models/user.model");
+const bcrypt_1 = require("bcrypt");
 dotenv_1.default.config();
 const key = process.env.SECRET_KEY;
 class Auth {
-    static verify_token(token) {
+    static verify_token(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const token = req.headers.authorization;
+            const token = req.headers.authorization;
             console.log(token);
             if (token) {
                 const decoded = jsonwebtoken_1.default.verify(token, key);
@@ -30,6 +32,23 @@ class Auth {
             else {
                 return false;
             }
+        });
+    }
+    static find_user(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const isUser = yield user_model_1.User.findOne({ where: { email } });
+            if (isUser) {
+                return isUser;
+            }
+            else {
+                return false;
+            }
+        });
+    }
+    static generate_hash_pass(password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const salt = yield bcrypt_1.bcrypt.genSalt(10);
+            return yield bcrypt_1.bcrypt.hash(password, salt);
         });
     }
 }

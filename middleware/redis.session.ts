@@ -54,4 +54,15 @@ export class Redis {
             console.log(err);
         }
     }
+
+    static async get_otp(email){
+        if(await client.exists(email)){
+            const otp_details = await client.get(email);
+            const userOTP = JSON.parse(otp_details);
+            return userOTP.otp
+        }
+        else{
+            return false;
+        }
+    }
 }

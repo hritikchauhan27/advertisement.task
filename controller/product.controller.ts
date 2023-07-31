@@ -43,7 +43,7 @@ export class product{
         const currentBid = req.body.currentBid;
         try {
 
-            var product = await Product.findOne({where:{id:pid}}); //TODO: 1
+            var product = await Product.findOne({where:{id:pid}}); 
             console.log(product)
             if(product.current_bid<currentBid){
                  product = Product.update({current_bid:currentBid},

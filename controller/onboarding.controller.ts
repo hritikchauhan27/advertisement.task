@@ -72,7 +72,6 @@ export class LoginUser {
                 if (!userSession || !userSession.status) {
                     const hash = user.password;
                     if (bcrypt.compare(detail.password, hash)) {
-                        // const emailT = detail.email;
                         const token = jwt.sign(detail.email, process.env.SECRET_KEY);
                         console.log(token);
                         await Sessions.maintain_session(req, res, device, user, userSession);
@@ -106,14 +105,12 @@ export class Logout {
         redisClient.on('error', err => console.log('Redis client error', err));
         await redisClient.connect();
         try {
-            const token = req.headers.authorization;
-            const userToken = await Auth.verify_token(token);
-            const user = await User.findOne({ where: { email: userToken } }); //TODO:7
+            const userToken = await Auth.verify_token(req);
+            const user = await User.findOne({ where: { email: userToken } }); 
             console.log(user);
             if (user) {
                 const id = user.id;
                 console.log(id);
-
                 const userSession = await Session.findOne({ where: { user_id: id } });
                 console.log(userSession);
                 if (user) {
@@ -123,23 +120,13 @@ export class Logout {
                         const updatedUserSession = await Session.update({ status: !userSession.status },
                             {
                                 where:
-                                    { id: userSession.id } //TODO:8
+                                    { id: userSession.id } 
                             });
                         console.log(updatedUserSession);
                         res.status(201).json({ message: "User logOut Successfully" });
-                    }
-                    else {
-                        res.status(404).json({ message: "User is already inactive" });
-                    }
-                }
-                else {
-                    res.status(404).json({ message: "Session not found" });
-                }
+                    }   
+                }   
             }
-            else {
-                res.status(404).json({ message: "User not found" });
-            }
-
         }
         catch (err) {
             res.status(500).json({ message: "Server Error" });
@@ -191,6 +178,35 @@ export class forgotPassword {
                     return res.status(200).json({ message: 'Password reset link sent to email' });
                 }
             });
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+
+    static async reset_password(req: any, res: any) {
+        try {
+            const { email, otp, newPassword } = req.body;
+
+            const user = await Auth.find_user(email);;
+
+            if (!user) {
+                return res.status(400).json({ message: 'Invalid User' });
+            }
+
+            const userOTP = await Redis.get_otp(email);
+            console.log(userOTP);
+            if (!userOTP || userOTP !== otp) {
+                return res.status(401).json({ error: 'Invalid OTP' });
+            }
+
+            console.log(user.password);
+            user.password = await Auth.generate_hash_pass(newPassword);
+            console.log(user.password);
+            await user.save();
+
+            return res.status(200).json({ message: 'Password reset successful' });
         }
         catch (error) {
             console.log(error);

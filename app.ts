@@ -1,24 +1,43 @@
-import express from "express";
+import express, { Router } from "express";
 import * as  dotenv from 'dotenv';
-import { sequelize,dbconnection } from "./core/connection";
-import { userRouter } from "./router/userRoute"; 
-import { cateRouter } from "./router/categoryRoute";
-import { productRouter } from "./router/product.route";
-import { addressRouter } from "./router/address.route";
-import { imageRouter } from "./router/image.route";
+import { sequelize, dbconnection } from "./core/connection";
+import { appRoutes } from "./router/index.route";
+import swaggerUi from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
+
+const options:swaggerJSDoc.options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: "Advertisment Management System",
+            version: "1.0.0"
+        },
+        schemas:['http', 'https'],
+        servers: [
+        {
+            url: "http://localhost:3003/"
+        }
+        ]
+    },
+    apis: ['./swagger/user.servicedoc.yaml','./swagger/product.servicedoc.yaml'],
+    
+};
 
 const app = express();
-dotenv.config();  
-dbconnection(); //TODO: 3
+dotenv.config();
+
+async () => {
+    await dbconnection();
+}
+
 app.use(express.json());
 const port = process.env.PORT;
+app.use("/", appRoutes.loadAppRoutes());
 
-app.use('/',userRouter);  //TODO: 2
-app.use("/",cateRouter);
-app.use('/',productRouter);
-app.use("/",addressRouter);
-app.use("/",imageRouter);
+const swaggerDocument = swaggerJSDoc(options);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.listen(port,()=>{
+
+app.listen(port, () => {
     console.log(`listening at port ${port}`);
 })

@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -29,21 +38,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv = __importStar(require("dotenv"));
 const connection_1 = require("./core/connection");
-const userRoute_1 = require("./router/userRoute");
-const categoryRoute_1 = require("./router/categoryRoute");
-const product_route_1 = require("./router/product.route");
-const address_route_1 = require("./router/address.route");
-const image_route_1 = require("./router/image.route");
+const index_route_1 = require("./router/index.route");
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: "Advertisment Management System",
+            version: "1.0.0"
+        },
+        schemas: ['http', 'https'],
+        servers: [
+            {
+                url: "http://localhost:3003/"
+            }
+        ]
+    },
+    apis: ['./swagger/user.servicedoc.yaml', './swagger/product.servicedoc.yaml'],
+};
 const app = (0, express_1.default)();
 dotenv.config();
-(0, connection_1.dbconnection)();
+() => __awaiter(void 0, void 0, void 0, function* () {
+    yield (0, connection_1.dbconnection)();
+});
 app.use(express_1.default.json());
 const port = process.env.PORT;
-app.use('/', userRoute_1.userRouter);
-app.use("/", categoryRoute_1.cateRouter);
-app.use('/', product_route_1.productRouter);
-app.use("/", address_route_1.addressRouter);
-app.use("/", image_route_1.imageRouter);
+app.use("/", index_route_1.appRoutes.loadAppRoutes());
+const swaggerDocument = (0, swagger_jsdoc_1.default)(options);
+app.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
 app.listen(port, () => {
     console.log(`listening at port ${port}`);
 });
