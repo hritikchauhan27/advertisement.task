@@ -49,8 +49,7 @@ export const addressValidation = (req: any, res: any, next: () => void) => {
         city: Joi.string().required(),
         state: Joi.string().required(),
         zip_code: Joi.number().required(),
-        country: Joi.number().required(),
-        address_type: Joi.valid("Work", "Home","other").required(),
+        address_type: Joi.valid('Home','Work','other').required(),
         user_id: Joi.number().required(),
     });
     const result = AddressSchema.validate(req.body)

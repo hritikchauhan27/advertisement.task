@@ -51,8 +51,7 @@ const addressValidation = (req, res, next) => {
         city: joi_1.default.string().required(),
         state: joi_1.default.string().required(),
         zip_code: joi_1.default.number().required(),
-        country: joi_1.default.number().required(),
-        address_type: joi_1.default.valid("Work", "Home", "other").required(),
+        address_type: joi_1.default.valid('Home', 'Work', 'other').required(),
         user_id: joi_1.default.number().required(),
     });
     const result = AddressSchema.validate(req.body);
