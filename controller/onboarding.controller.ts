@@ -1,5 +1,4 @@
 import { User } from "../models/user.model";
-import { SingnUpschema } from "../middleware/validation";
 import joi from "@hapi/joi";
 import jwt from "jsonwebtoken";
 import { Redis } from "../middleware/redis.session";
@@ -11,9 +10,6 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import nodemailer from "nodemailer";
 
-// const redisClient = createClient();
-// redisClient.on('error', err => console.log('Redis client error', err));
-// redisClient.connect();
 
 dotenv.config();
 
@@ -24,10 +20,6 @@ export class signUp {
         const details = req.body;
         // console.log(details);
         try {
-            const { error, value } = await SingnUpschema.validate(details);
-            if (error) {
-                res.status(400).json({ message: "Invalid user input" });
-            } else {
                 const user = await User.findOne({ where: { email: details.email } });
                 // console.log(user);
                 if (user) {
@@ -47,7 +39,7 @@ export class signUp {
                     // console.log(newUser);
                     res.status(201).json({ message: "User registered successfully" });
                 }
-            }
+            // }
         } catch (error) {
             res.status(500).json({ message: "Server Error" });
         }

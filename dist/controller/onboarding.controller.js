@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.forgotPassword = exports.Logout = exports.LoginUser = exports.signUp = void 0;
 const user_model_1 = require("../models/user.model");
-const validation_1 = require("../middleware/validation");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const redis_session_1 = require("../middleware/redis.session");
 const redis_1 = require("redis");
@@ -24,9 +23,6 @@ const decode_1 = require("../middleware/decode");
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
-// const redisClient = createClient();
-// redisClient.on('error', err => console.log('Redis client error', err));
-// redisClient.connect();
 dotenv_1.default.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 class signUp {
@@ -35,32 +31,27 @@ class signUp {
             const details = req.body;
             // console.log(details);
             try {
-                const { error, value } = yield validation_1.SingnUpschema.validate(details);
-                if (error) {
-                    res.status(400).json({ message: "Invalid user input" });
+                const user = yield user_model_1.User.findOne({ where: { email: details.email } });
+                // console.log(user);
+                if (user) {
+                    res.status(409).json({ message: "User already exist" });
                 }
                 else {
-                    const user = yield user_model_1.User.findOne({ where: { email: details.email } });
-                    // console.log(user);
-                    if (user) {
-                        res.status(409).json({ message: "User already exist" });
-                    }
-                    else {
-                        const salt = yield bcrypt_1.default.genSalt(10);
-                        const hashPassword = yield bcrypt_1.default.hash(details.password, salt);
-                        // console.log(hashPassword);
-                        const newUser = yield user_model_1.User.create({
-                            email: details.email,
-                            name: details.name,
-                            password: hashPassword,
-                            phone_number: details.phone_number,
-                            status: details.status,
-                            DOB: details.DOB
-                        });
-                        // console.log(newUser);
-                        res.status(201).json({ message: "User registered successfully" });
-                    }
+                    const salt = yield bcrypt_1.default.genSalt(10);
+                    const hashPassword = yield bcrypt_1.default.hash(details.password, salt);
+                    // console.log(hashPassword);
+                    const newUser = yield user_model_1.User.create({
+                        email: details.email,
+                        name: details.name,
+                        password: hashPassword,
+                        phone_number: details.phone_number,
+                        status: details.status,
+                        DOB: details.DOB
+                    });
+                    // console.log(newUser);
+                    res.status(201).json({ message: "User registered successfully" });
                 }
+                // }
             }
             catch (error) {
                 res.status(500).json({ message: "Server Error" });

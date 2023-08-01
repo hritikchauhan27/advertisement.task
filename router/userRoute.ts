@@ -1,12 +1,12 @@
 import express from "express";
 import { LoginUser, Logout, signUp, forgotPassword } from "../controller/onboarding.controller";
 import { authenticateToken } from "../middleware/auth";
-
+import { userValidate } from "../middleware/validation";
 const userRouter = express.Router();  
 
 userRouter.get("/");
 
-userRouter.post("/signup",signUp.userLogin);  
+userRouter.post("/signup",userValidate,signUp.userLogin);  
 userRouter.post("/login",LoginUser.userLogin);
 userRouter.get("/logout",authenticateToken,Logout.logout_user);
 userRouter.post('/forgot_pass', forgotPassword.forgot_password);
