@@ -1,5 +1,5 @@
 import { User } from "../models/user.model";
-import { schema } from "../middleware/validation";
+import { SingnUpschema } from "../middleware/validation";
 import joi from "@hapi/joi";
 import jwt from "jsonwebtoken";
 import { Redis } from "../middleware/redis.session";
@@ -24,7 +24,7 @@ export class signUp {
         const details = req.body;
         // console.log(details);
         try {
-            const { error, value } = await schema.validate(details);
+            const { error, value } = await SingnUpschema.validate(details);
             if (error) {
                 res.status(400).json({ message: "Invalid user input" });
             } else {
@@ -140,7 +140,8 @@ export class forgotPassword {
     static async forgot_password(req: any, res: any) {
         try {
             const { email } = req.body;
-            const user = await User.findOne({ where: { email } });
+            console.log(req.body);
+            const user = await User.findOne({ where: { email: email } });
             if (!user) {
                 return res.status(400).json({ message: 'Email not found' });
             }

@@ -35,7 +35,7 @@ class signUp {
             const details = req.body;
             // console.log(details);
             try {
-                const { error, value } = yield validation_1.schema.validate(details);
+                const { error, value } = yield validation_1.SingnUpschema.validate(details);
                 if (error) {
                     res.status(400).json({ message: "Invalid user input" });
                 }
@@ -154,7 +154,8 @@ class forgotPassword {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                const user = yield user_model_1.User.findOne({ where: { email } });
+                console.log(req.body);
+                const user = yield user_model_1.User.findOne({ where: { email: email } });
                 if (!user) {
                     return res.status(400).json({ message: 'Email not found' });
                 }

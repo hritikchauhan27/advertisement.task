@@ -42,7 +42,7 @@ export class category {
     }
 }
 
-    //***** By using seperate API for category, subcategory and sub-sub category */
+    //************** By using seperate API for category, subcategory and sub-sub category ***************/
 
     // static async getCategory(req:any,res:any){
     //     const subParent_id =req.headers.subparent;

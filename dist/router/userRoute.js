@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const onboarding_controller_1 = require("../controller/onboarding.controller");
+const auth_1 = require("../middleware/auth");
 const userRouter = express_1.default.Router();
 exports.userRouter = userRouter;
 userRouter.get("/");
 userRouter.post("/signup", onboarding_controller_1.signUp.userLogin);
 userRouter.post("/login", onboarding_controller_1.LoginUser.userLogin);
-userRouter.get("/logout", onboarding_controller_1.Logout.logout_user);
+userRouter.get("/logout", auth_1.authenticateToken, onboarding_controller_1.Logout.logout_user);
 userRouter.post('/forgot_pass', onboarding_controller_1.forgotPassword.forgot_password);
+userRouter.post('/reset_pass', onboarding_controller_1.forgotPassword.reset_password);
 //# sourceMappingURL=userRoute.js.map

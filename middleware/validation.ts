@@ -1,6 +1,7 @@
 import joi from '@hapi/joi';
 
-const schema = joi.object({
+
+const SingnUpschema = joi.object({
     email: joi.string().email().lowercase().required(),
     name: joi.string().min(3).max(30).required(),
     password: joi.string().min(2).required(),
@@ -9,4 +10,6 @@ const schema = joi.object({
     DOB: joi.date().allow(null),
 });
 
-export { schema };
+// const 
+
+export { SingnUpschema};

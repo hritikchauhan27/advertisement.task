@@ -17,7 +17,7 @@ const joi_1 = __importDefault(require("@hapi/joi"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = require("../models/user.model");
-const bcrypt_1 = require("bcrypt");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 dotenv_1.default.config();
 const key = process.env.SECRET_KEY;
 class Auth {
@@ -47,8 +47,8 @@ class Auth {
     }
     static generate_hash_pass(password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const salt = yield bcrypt_1.bcrypt.genSalt(10);
-            return yield bcrypt_1.bcrypt.hash(password, salt);
+            const salt = yield bcrypt_1.default.genSalt(10);
+            return yield bcrypt_1.default.hash(password, salt);
         });
     }
 }
