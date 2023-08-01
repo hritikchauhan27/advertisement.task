@@ -18,6 +18,21 @@ export const userValidate = (req: any, res: any, next: () => void) => {
     }
 }
 
+export const loginValidation=(req:any,res:any,next:()=>void)=>{
+    const verify_login_details = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(5).max(30).required()
+    })
+    let result=verify_login_details.validate(req.body)
+    if(result.error)
+  {
+      res.status(400).send(result.error);
+  }
+  else{
+      next();
+  }
+}
+
 export const productValidator = (req: any, res: any, next: () => void) => {
 
     const ProductSchema = Joi.object({

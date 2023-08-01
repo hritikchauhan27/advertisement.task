@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Auth = void 0;
-const joi_1 = __importDefault(require("@hapi/joi"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = require("../models/user.model");
@@ -53,8 +52,4 @@ class Auth {
     }
 }
 exports.Auth = Auth;
-Auth.verify_login_details = joi_1.default.object({
-    email: joi_1.default.string().email().required(),
-    password: joi_1.default.string().min(5).max(30).required()
-});
 //# sourceMappingURL=decode.js.map

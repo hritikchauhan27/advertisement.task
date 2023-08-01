@@ -22,10 +22,6 @@ export class Auth{
         }
     }
 
-    static verify_login_details = Joi.object({
-        email: Joi.string().email().required(),
-        password: Joi.string().min(5).max(30).required()
-    });
 
     static async find_user(email) {
         const isUser = await User.findOne({ where: { email} });

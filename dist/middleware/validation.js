@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addressValidation = exports.productValidator = exports.userValidate = void 0;
+exports.addressValidation = exports.productValidator = exports.loginValidation = exports.userValidate = void 0;
 const joi_1 = __importDefault(require("@hapi/joi"));
 const userValidate = (req, res, next) => {
     const SingnUpschema = joi_1.default.object({
@@ -23,6 +23,20 @@ const userValidate = (req, res, next) => {
     }
 };
 exports.userValidate = userValidate;
+const loginValidation = (req, res, next) => {
+    const verify_login_details = joi_1.default.object({
+        email: joi_1.default.string().email().required(),
+        password: joi_1.default.string().min(5).max(30).required()
+    });
+    let result = verify_login_details.validate(req.body);
+    if (result.error) {
+        res.status(400).send(result.error);
+    }
+    else {
+        next();
+    }
+};
+exports.loginValidation = loginValidation;
 const productValidator = (req, res, next) => {
     const ProductSchema = joi_1.default.object({
         name: joi_1.default.string().required(),

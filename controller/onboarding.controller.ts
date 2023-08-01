@@ -55,7 +55,6 @@ export class LoginUser {
         try {
             const device = req.headers.device;
             console.log(device);
-            await Auth.verify_login_details.validateAsync(detail);
             const user = await User.findOne({ where: { email: detail.email } });
             console.log(user);
             if (user) {

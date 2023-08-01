@@ -70,7 +70,6 @@ class LoginUser {
             try {
                 const device = req.headers.device;
                 console.log(device);
-                yield decode_1.Auth.verify_login_details.validateAsync(detail);
                 const user = yield user_model_1.User.findOne({ where: { email: detail.email } });
                 console.log(user);
                 if (user) {
