@@ -8,6 +8,6 @@ productRouter.get("/");
 productRouter.post("/addProduct",productValidator,authenticateToken,product.addProduct);
 productRouter.get("/getProduct",authenticateToken,product.getProduct);
 productRouter.get("/getProduct/:pId",authenticateToken,product.getProduct);
-productRouter.post("/addBid/:pid",authenticateToken,product.addbid);
+productRouter.post("/addBid/:pid/:bid",authenticateToken,product.addbid);
 
 export {productRouter}

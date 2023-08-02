@@ -52,12 +52,13 @@ class product {
     static addbid(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const pid = req.params.pid;
+            const bid = req.params.bid;
             const currentBid = req.body.currentBid;
             try {
                 var product = yield product_model_1.Product.findOne({ where: { id: pid } });
                 console.log(product);
                 if (product.current_bid < currentBid) {
-                    product = product_model_1.Product.update({ current_bid: currentBid }, { where: {
+                    product = product_model_1.Product.update({ current_bid: currentBid, bidder_id: bid }, { where: {
                             id: pid
                         } });
                 }

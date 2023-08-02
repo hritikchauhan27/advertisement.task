@@ -40,13 +40,14 @@ export class product{
 
     static async addbid(req:any,res:any){
         const pid = req.params.pid;
+        const bid = req.params.bid;
         const currentBid = req.body.currentBid;
         try {
 
             var product = await Product.findOne({where:{id:pid}}); 
             console.log(product)
             if(product.current_bid<currentBid){
-                 product = Product.update({current_bid:currentBid},
+                 product = Product.update({current_bid:currentBid,bidder_id:bid},
                     {where:{
                         id:pid
                     }})

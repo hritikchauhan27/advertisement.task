@@ -14,5 +14,5 @@ productRouter.get("/");
 productRouter.post("/addProduct", validation_1.productValidator, auth_1.authenticateToken, product_controller_1.product.addProduct);
 productRouter.get("/getProduct", auth_1.authenticateToken, product_controller_1.product.getProduct);
 productRouter.get("/getProduct/:pId", auth_1.authenticateToken, product_controller_1.product.getProduct);
-productRouter.post("/addBid/:pid", auth_1.authenticateToken, product_controller_1.product.addbid);
+productRouter.post("/addBid/:pid/:bid", auth_1.authenticateToken, product_controller_1.product.addbid);
 //# sourceMappingURL=product.route.js.map

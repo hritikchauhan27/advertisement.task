@@ -15,23 +15,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.image = void 0;
 const image_model_1 = require("../models/image.model");
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 class image {
     static addimages(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(req.files);
+                let bufferDataArray = [];
+                // console.log(req.files);
                 const pid = req.params.pid;
                 const files = req.files;
-                const bufferDataArray = [];
-                for (let file in files) {
+                for (const file of files) {
                     // console.log(files[file].path);
-                    const fileData = fs_1.default.readFileSync(files[file].path);
+                    const imagePath = path_1.default.join("uploads", file === null || file === void 0 ? void 0 : file.filename);
+                    const fileData = fs_1.default.readFileSync(imagePath);
                     // console.log(fileData);
                     const bufferData = Buffer.from(fileData);
                     bufferDataArray.push(bufferData);
-                    console.log(bufferData);
+                    // console.log(bufferData);
                 }
-                //console.log(req.user);
+                console.log(req.user);
                 const images = yield image_model_1.Image.create({ image: bufferDataArray, product_id: pid });
                 console.log(images);
                 res.status(201).json({ message: "images registered successfully" });
