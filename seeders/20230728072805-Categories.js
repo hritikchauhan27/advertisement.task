@@ -19,6 +19,10 @@ module.exports = {
       parent_id: 2
     },
     {
+      name: 'fashion',
+      parent_id:null
+    },
+    {
       name: 'Samsung',
       parent_id: 3
     },
